@@ -1,0 +1,12 @@
+
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-provider-servicenow-data
+  description: Terraform provider that can manage data in any SN table it can Read/Write
+  annotations:
+    github.com/project-slug: BESTSELLER/terraform-provider-servicenow-data
+spec:
+  type: service
+  lifecycle: experimental
+  owner: 
