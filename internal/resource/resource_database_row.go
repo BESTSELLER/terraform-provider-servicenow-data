@@ -65,7 +65,7 @@ var RowSchema = map[string]*schema.Schema{
 		Required:    false,
 		Optional:    false,
 		Computed:    true},
-	"simple_columns": {
+	"custom_columns": {
 		Description: "Custom columns that are not references",
 		Type:        schema.TypeMap,
 		Elem: &schema.Schema{
