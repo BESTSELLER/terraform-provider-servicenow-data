@@ -28,7 +28,7 @@ var once sync.Once
 func NewClient(url, user, pass string) *Client {
 	once.Do(func() {
 		httpClient = &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: time.Duration(30) * time.Second,
 		}
 	})
 
