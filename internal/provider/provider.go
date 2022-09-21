@@ -38,6 +38,7 @@ func ServiceNowDataProvider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var host, username, password *string
+	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	hVal, ok := d.GetOk("sn_api_user")
@@ -70,8 +71,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 			Summary:  "sn_api_url - Missing required config",
 		})
 	}
-
-	// Warning or errors can be collected in a slice type
 
 	c := client.NewClient(*host, *username, *password)
 
