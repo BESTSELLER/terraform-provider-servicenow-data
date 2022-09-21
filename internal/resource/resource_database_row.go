@@ -5,10 +5,10 @@ import (
 	"time"
 )
 
-const databaseRowResourceName = "sn_application"
+const DatabaseRowResourceName = "sn_application"
 
 // TODO
-func databaseRowResource() *schema.Resource {
+func DatabaseRowResource() *schema.Resource {
 	return &schema.Resource{
 		Schema:         RowSchema,
 		SchemaVersion:  1,
@@ -39,31 +39,26 @@ var RowSchema = map[string]*schema.Schema{
 		Description: "The unique id of the row",
 		Type:        schema.TypeString,
 		Required:    false,
-		Optional:    false,
 		Computed:    true},
 	"sys_updated_by": {
 		Description: "User that made the last update",
 		Type:        schema.TypeString,
 		Required:    false,
-		Optional:    false,
 		Computed:    true},
 	"sys_created_by": {
 		Description: "Account that created the row",
 		Type:        schema.TypeString,
 		Required:    false,
-		Optional:    false,
 		Computed:    true},
 	"sys_created_on": {
 		Description: "Creation Time",
 		Type:        schema.TypeString,
 		Required:    false,
-		Optional:    false,
 		Computed:    true},
 	"sys_updated_on": {
 		Description: "Last update Time",
 		Type:        schema.TypeString,
 		Required:    false,
-		Optional:    false,
 		Computed:    true},
 	"custom_columns": {
 		Description: "Custom columns that are not references",
