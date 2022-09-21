@@ -3,7 +3,9 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
 	"io"
 	"net/http"
 	"sync"
@@ -39,41 +41,69 @@ func NewClient(url, user, pass string) *Client {
 	}
 }
 
-func (Client *Client) sendRequest(method string, path string, payload interface{}, statusCode int) (value string, err error) {
-	url := Client.url + path
+func (client *Client) GetTableRow(tableName, sysID string) (*map[string]string, error) {
+	rowPath := fmt.Sprintf("/table/%s/%s", tableName, sysID)
+	rawData, err := client.sendRequest(http.MethodGet, rowPath, nil, 200)
+	if err != nil {
+		return nil, err
+	}
+	var objMap map[string]json.RawMessage
+	err = json.Unmarshal(*rawData, &objMap)
+	if err == nil {
+		return nil, err
+	}
+	rowData := make(map[string]string, len(objMap))
+
+	for s, message := range objMap {
+		var str string
+		err = json.Unmarshal(message, &str)
+		if err == nil {
+			rowData[s] = str
+		} else {
+			var ai models.ApprovalItem
+			err = json.Unmarshal(message, &ai)
+			if err != nil {
+				return nil, errors.New(fmt.Sprintf("Unmarshal exploded for result.%s.%v", s, message))
+			}
+			rowData[s] = ai.Value
+		}
+	}
+	return &rowData, nil
+}
+
+func (client *Client) sendRequest(method, path string, payload interface{}, statusCode int) (value *[]byte, err error) {
+	url := client.url + "/api/now" + path
 
 	b := new(bytes.Buffer)
 	err = json.NewEncoder(b).Encode(payload)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	req, err := http.NewRequest(method, url, b)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	req.SetBasicAuth(Client.user, Client.pass)
+	req.SetBasicAuth(client.user, client.pass)
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := httpClient.Do(req)
 	defer resp.Body.Close()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	strbody := string(body)
 
 	if statusCode != 0 {
 		if resp.StatusCode != statusCode {
-			return "", fmt.Errorf("[ERROR] unexpected status code got: %v expected: %v  \n %v  \n %v", resp.StatusCode, statusCode, strbody, url)
+			return nil, fmt.Errorf("[ERROR] unexpected status code got: %v expected: %v  \n %v  \n %v", resp.StatusCode, statusCode, string(body), url)
 		}
 	}
 
-	return strbody, nil
+	return &body, nil
 }

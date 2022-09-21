@@ -3,13 +3,13 @@ package provider
 import (
 	"context"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
+	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/datasource"
+	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func ServiceNowDataProvider() *schema.Provider {
-	dataSources := make(map[string]*schema.Resource)
-	resources := make(map[string]*schema.Resource)
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"sn_api_user": {
@@ -29,8 +29,12 @@ func ServiceNowDataProvider() *schema.Provider {
 				Description: "The URL to the SN table using basic auth"},
 		},
 
-		ResourcesMap:         resources,
-		DataSourcesMap:       dataSources,
+		ResourcesMap: map[string]*schema.Resource{
+			resource.DatabaseRowResourceName: resource.DatabaseRowResource(),
+		},
+		DataSourcesMap: map[string]*schema.Resource{
+			resource.DatabaseRowResourceName: datasource.DatabaseRowDatasource(),
+		},
 		ConfigureContextFunc: providerConfigure,
 	}
 	return p
