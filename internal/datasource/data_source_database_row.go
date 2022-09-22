@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
-	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -12,7 +11,24 @@ import (
 // TODO
 func DatabaseRowDatasource() *schema.Resource {
 	return &schema.Resource{
-		Schema:        resource.RowSchema,
+		Schema: map[string]*schema.Schema{
+			"table_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"sys_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"row_data": {
+				Description: "Columns",
+				Optional:    true,
+				Computed:    true,
+				Type:        schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString},
+			},
+		},
 		ReadContext:   dataSourceDatabaseRowRead,
 		Description:   "A row in a SN table",
 		UseJSONNumber: false,
@@ -32,8 +48,7 @@ func dataSourceDatabaseRowRead(ctx context.Context, data *schema.ResourceData, m
 		})
 		return diags
 	}
-	rowID := data.Get("row_data").(map[string]string)["sys_id"]
-
+	rowID := data.Get("sys_id").(string)
 	if rowID == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

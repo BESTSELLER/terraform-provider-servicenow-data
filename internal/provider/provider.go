@@ -14,17 +14,17 @@ func ServiceNowDataProvider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"sn_api_user": {
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SN_API_USER", ""),
 				Description: "The user required to auth to the SN table API using basic auth"},
 			"sn_api_pass": {
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SN_API_PASS", ""),
 				Description: "The Password required to auth to the SN table API using basic auth"},
 			"sn_api_url": {
 				Type:        schema.TypeString,
-				Optional:    false,
+				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("SN_API_URL", ""),
 				Description: "The URL to the SN table using basic auth"},
 		},

@@ -5,11 +5,28 @@ import (
 	"time"
 )
 
-const DatabaseRowResourceName = "sn_application"
+const DatabaseRowResourceName = "servicenow-data_table_row"
 
 func DatabaseRowResource() *schema.Resource {
 	return &schema.Resource{
-		Schema:         RowSchema,
+		Schema: map[string]*schema.Schema{
+			"table_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"sys_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"row_data": {
+				Description: "Columns",
+				Optional:    true,
+				Computed:    true,
+				Type:        schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString},
+			},
+		},
 		SchemaVersion:  1,
 		StateUpgraders: nil,
 		CreateContext:  nil,
@@ -31,49 +48,4 @@ func DatabaseRowResource() *schema.Resource {
 		Description:   "A row in a SN table",
 		UseJSONNumber: false,
 	}
-}
-
-var RowSchema = map[string]*schema.Schema{
-	"table_id": {
-		Type:     schema.TypeString,
-		Required: true,
-		Computed: false,
-	},
-	"row_data": {
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"sys_id": {
-					Description: "The unique id of the row",
-					Type:        schema.TypeString,
-					Required:    false,
-					Computed:    true},
-				"sys_updated_by": {
-					Description: "User that made the last update",
-					Type:        schema.TypeString,
-					Required:    false,
-					Computed:    true},
-				"sys_created_by": {
-					Description: "Account that created the row",
-					Type:        schema.TypeString,
-					Required:    false,
-					Computed:    true},
-				"sys_created_on": {
-					Description: "Creation Time",
-					Type:        schema.TypeString,
-					Required:    false,
-					Computed:    true},
-				"sys_updated_on": {
-					Description: "Last update Time",
-					Type:        schema.TypeString,
-					Required:    false,
-					Computed:    true},
-				"custom_columns": {
-					Description: "Custom columns that are not references",
-					Type:        schema.TypeMap,
-					Elem: &schema.Schema{
-						Type: schema.TypeString},
-				},
-			},
-		},
-	},
 }
