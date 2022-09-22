@@ -47,14 +47,14 @@ func (client *Client) GetTableRow(tableName, sysID string) (*map[string]interfac
 	if err != nil {
 		return nil, err
 	}
-	var objMap map[string]json.RawMessage
+	var objMap models.RawResult
 	err = json.Unmarshal(*rawData, &objMap)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
-	rowData := make(map[string]interface{}, len(objMap))
+	rowData := make(map[string]interface{}, len(objMap.Result))
 
-	for s, message := range objMap {
+	for s, message := range objMap.Result {
 		var str string
 		err = json.Unmarshal(message, &str)
 		if err == nil {

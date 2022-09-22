@@ -62,7 +62,7 @@ func dataSourceDatabaseRowRead(ctx context.Context, data *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	if err := data.Set("row_data", &rowData); err != nil {
+	if err := data.Set("row_data", rowData); err != nil {
 		return diag.FromErr(err)
 	}
 
