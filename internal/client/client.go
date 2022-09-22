@@ -41,7 +41,7 @@ func NewClient(url, user, pass string) *Client {
 	}
 }
 
-func (client *Client) GetTableRow(tableName, sysID string) (*map[string]string, error) {
+func (client *Client) GetTableRow(tableName, sysID string) (*map[string]interface{}, error) {
 	rowPath := fmt.Sprintf("/table/%s/%s", tableName, sysID)
 	rawData, err := client.sendRequest(http.MethodGet, rowPath, nil, 200)
 	if err != nil {
@@ -52,7 +52,7 @@ func (client *Client) GetTableRow(tableName, sysID string) (*map[string]string, 
 	if err == nil {
 		return nil, err
 	}
-	rowData := make(map[string]string, len(objMap))
+	rowData := make(map[string]interface{}, len(objMap))
 
 	for s, message := range objMap {
 		var str string

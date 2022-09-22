@@ -22,8 +22,6 @@ func DatabaseRowDatasource() *schema.Resource {
 func dataSourceDatabaseRowRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 
-	rowData := data.Get("row_data").([]interface{})
-
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 	tableID := data.Get("table_id").(string)
@@ -44,22 +42,16 @@ func dataSourceDatabaseRowRead(ctx context.Context, data *schema.ResourceData, m
 		return diags
 	}
 
-	order, err := c.GetTableRow(tableID, rowID)
+	rowData, err := c.GetTableRow(tableID, rowID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	rowData = parseRowSchema(tableID, order)
-	if err := data.Set("row_data", rowData); err != nil {
+	if err := data.Set("row_data", &rowData); err != nil {
 		return diag.FromErr(err)
 	}
 
 	data.SetId(fmt.Sprintf("%s/%s", tableID, rowID))
 
 	return diags
-
-}
-
-func parseRowSchema(tableID string, row *map[string]string) []interface{} {
-	panic("parseRowSchema unimplemented")
 }
