@@ -41,34 +41,31 @@ func NewClient(url, user, pass string) *Client {
 	}
 }
 
-func (client *Client) GetTableRow(tableName, sysID string) (*map[string]interface{}, error) {
+func (client *Client) GetTableRow(tableName, sysID string) (*map[string]string, error) {
 	rowPath := fmt.Sprintf("/table/%s/%s", tableName, sysID)
 	rawData, err := client.sendRequest(http.MethodGet, rowPath, nil, 200)
 	if err != nil {
 		return nil, err
 	}
-	var objMap models.RawResult
-	err = json.Unmarshal(*rawData, &objMap)
+	return parseRawData(rawData)
+}
+
+func (client *Client) InsertTableRow(tableName string, tableData interface{}) (*map[string]string, error) {
+	rowPath := fmt.Sprintf("/table/%s", tableName)
+	rawData, err := client.sendRequest(http.MethodPost, rowPath, tableData, 201)
 	if err != nil {
 		return nil, err
 	}
-	rowData := make(map[string]interface{}, len(objMap.Result))
+	return parseRawData(rawData)
+}
 
-	for s, message := range objMap.Result {
-		var str string
-		err = json.Unmarshal(message, &str)
-		if err == nil {
-			rowData[s] = str
-		} else {
-			var ai models.ApprovalItem
-			err = json.Unmarshal(message, &ai)
-			if err != nil {
-				return nil, errors.New(fmt.Sprintf("Unmarshal exploded for result.%s.%v", s, message))
-			}
-			rowData[s] = ai.Value
-		}
+func (client *Client) DeleteTableRow(tableID string, rowID string) error {
+	rowPath := fmt.Sprintf("/table/%s/%s", tableID, rowID)
+	_, err := client.sendRequest(http.MethodDelete, rowPath, nil, 204)
+	if err != nil {
+		return err
 	}
-	return &rowData, nil
+	return nil
 }
 
 func (client *Client) sendRequest(method, path string, payload interface{}, statusCode int) (value *[]byte, err error) {
@@ -106,4 +103,29 @@ func (client *Client) sendRequest(method, path string, payload interface{}, stat
 	}
 
 	return &body, nil
+}
+
+func parseRawData(rawData *[]byte) (*map[string]string, error) {
+	var objMap models.RawResult
+	err := json.Unmarshal(*rawData, &objMap)
+	if err != nil {
+		return nil, err
+	}
+	rowData := make(map[string]string, len(objMap.Result))
+
+	for s, message := range objMap.Result {
+		var str string
+		err = json.Unmarshal(message, &str)
+		if err == nil {
+			rowData[s] = str
+		} else {
+			var ai models.ApprovalItem
+			err = json.Unmarshal(message, &ai)
+			if err != nil {
+				return nil, errors.New(fmt.Sprintf("Unmarshal exploded for result.%s.%v", s, message))
+			}
+			rowData[s] = ai.Value
+		}
+	}
+	return &rowData, nil
 }
