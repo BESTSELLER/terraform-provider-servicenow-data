@@ -105,6 +105,15 @@ func (client *Client) sendRequest(method, path string, payload interface{}, stat
 	return &body, nil
 }
 
+func (client *Client) UpdateTableRow(tableName, sysID string, payload interface{}) (*map[string]string, error) {
+	rowPath := fmt.Sprintf("/table/%s/%s", tableName, sysID)
+	rawData, err := client.sendRequest(http.MethodPut, rowPath, payload, 200)
+	if err != nil {
+		return nil, err
+	}
+	return parseRawData(rawData)
+}
+
 func parseRawData(rawData *[]byte) (*map[string]string, error) {
 	var objMap models.RawResult
 	err := json.Unmarshal(*rawData, &objMap)

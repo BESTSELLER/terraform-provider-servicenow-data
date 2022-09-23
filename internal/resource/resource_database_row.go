@@ -56,7 +56,7 @@ func DatabaseRowResource() *schema.Resource {
 	}
 }
 
-func databaseRowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func databaseRowCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -93,11 +93,54 @@ func databaseRowCreate(ctx context.Context, d *schema.ResourceData, m interface{
 	return diags
 }
 
-func databaseRowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	panic("NOT IMPLEMENTED!")
+func databaseRowUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*client.Client)
+	var tableID, rowID string
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+
+	if d.HasChange("table_id") {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "table_id cannot be modified after creation",
+		})
+		return diags
+	}
+	if d.HasChange("sys_id") {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "sys_id cannot be modified after creation",
+		})
+		return diags
+	}
+	if d.HasChange("row_data") {
+		items := d.Get("row_data").(map[string]interface{})
+		if items["sys_id"].(string) != tableID {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "sys_id cannot be modified after creation and must be identical in all fields",
+			})
+		}
+	}
+
+	split := strings.Split(d.Id(), `\`)
+	tableID = split[0]
+	rowID = split[1]
+
+	tableData := d.Get("row_data")
+	rowData, err := c.UpdateTableRow(tableID, rowID, tableData)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("row_data", rowData); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diags
 }
 
-func databaseRowDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func databaseRowDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
