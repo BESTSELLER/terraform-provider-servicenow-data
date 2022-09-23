@@ -6,6 +6,7 @@ import (
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strings"
 )
 
 // TODO
@@ -29,32 +30,38 @@ func DatabaseRowDatasource() *schema.Resource {
 					Type: schema.TypeString},
 			},
 		},
-		ReadContext:   dataSourceDatabaseRowRead,
+		ReadContext:   DatabaseRowRead,
 		Description:   "A row in a SN table",
 		UseJSONNumber: false,
 	}
 }
 
-func dataSourceDatabaseRowRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
+func DatabaseRowRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
-
+	var tableID, rowID string
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	tableID := data.Get("table_id").(string)
-	if tableID == "" {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "tableID is mandatory",
-		})
-		return diags
-	}
-	rowID := data.Get("sys_id").(string)
-	if rowID == "" {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "sys_id is mandatory",
-		})
-		return diags
+	if data.Id() != "" {
+		split := strings.Split(data.Id(), `\`)
+		tableID = split[0]
+		rowID = split[1]
+	} else {
+		tableID = data.Get("table_id").(string)
+		if tableID == "" {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "tableID is mandatory",
+			})
+			return diags
+		}
+		rowID = data.Get("sys_id").(string)
+		if rowID == "" {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "sys_id is mandatory",
+			})
+			return diags
+		}
 	}
 
 	rowData, err := c.GetTableRow(tableID, rowID)
