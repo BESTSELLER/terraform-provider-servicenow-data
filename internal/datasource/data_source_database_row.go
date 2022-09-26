@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-// TODO
 func DatabaseRowDatasource() *schema.Resource {
 	return &schema.Resource{
 		Schema: *models.MergeSchema(models.DefaultSystemColumns, map[string]*schema.Schema{
