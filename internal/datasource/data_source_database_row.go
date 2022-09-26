@@ -34,7 +34,7 @@ func DatabaseRowDatasource() *schema.Resource {
 	}
 }
 
-func DatabaseRowRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
+func DatabaseRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	var tableID, rowID string
 	var err error
@@ -68,9 +68,7 @@ func DatabaseRowRead(ctx context.Context, data *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	if err := data.Set("row_data", rowData); err != nil {
-		return diag.FromErr(err)
-	}
+	diags = append(diags, ParsedResultToSchema(data, rowData)...)
 
 	data.SetId(fmt.Sprintf("%s/%s", tableID, rowID))
 
@@ -83,4 +81,16 @@ func ExtractIDs(data *schema.ResourceData) (tableID, rowID string, err error) {
 		return "", "", errors.New(fmt.Sprintf("Faulty id!%s", data.Id()))
 	}
 	return ids[0], ids[1], nil
+}
+
+func ParsedResultToSchema(d *schema.ResourceData, result *models.ParsedResult) diag.Diagnostics {
+	for k, v := range result.SysData {
+		if err := d.Set(k, v); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+	if err := d.Set("row_data", result.RowData); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }

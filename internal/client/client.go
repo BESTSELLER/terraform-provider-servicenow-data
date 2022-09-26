@@ -8,6 +8,7 @@ import (
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -41,7 +42,7 @@ func NewClient(url, user, pass string) *Client {
 	}
 }
 
-func (client *Client) GetTableRow(tableName, sysID string) (*map[string]string, error) {
+func (client *Client) GetTableRow(tableName, sysID string) (*models.ParsedResult, error) {
 	rowPath := fmt.Sprintf("/table/%s/%s", tableName, sysID)
 	rawData, err := client.sendRequest(http.MethodGet, rowPath, nil, 200)
 	if err != nil {
@@ -50,7 +51,7 @@ func (client *Client) GetTableRow(tableName, sysID string) (*map[string]string, 
 	return parseRawData(rawData)
 }
 
-func (client *Client) InsertTableRow(tableName string, tableData interface{}) (*map[string]string, error) {
+func (client *Client) InsertTableRow(tableName string, tableData interface{}) (*models.ParsedResult, error) {
 	rowPath := fmt.Sprintf("/table/%s", tableName)
 	rawData, err := client.sendRequest(http.MethodPost, rowPath, tableData, 201)
 	if err != nil {
@@ -105,7 +106,7 @@ func (client *Client) sendRequest(method, path string, payload interface{}, stat
 	return &body, nil
 }
 
-func (client *Client) UpdateTableRow(tableName, sysID string, payload interface{}) (*map[string]string, error) {
+func (client *Client) UpdateTableRow(tableName, sysID string, payload interface{}) (*models.ParsedResult, error) {
 	rowPath := fmt.Sprintf("/table/%s/%s", tableName, sysID)
 	rawData, err := client.sendRequest(http.MethodPut, rowPath, payload, 200)
 	if err != nil {
@@ -114,27 +115,44 @@ func (client *Client) UpdateTableRow(tableName, sysID string, payload interface{
 	return parseRawData(rawData)
 }
 
-func parseRawData(rawData *[]byte) (*map[string]string, error) {
-	var objMap models.RawResult
-	err := json.Unmarshal(*rawData, &objMap)
+func parseRawData(rawData *[]byte) (*models.ParsedResult, error) {
+	var rawResult models.RawResult
+	var parsedResult = models.ParsedResult{}
+	err := json.Unmarshal(*rawData, &rawResult)
 	if err != nil {
 		return nil, err
 	}
-	rowData := make(map[string]string, len(objMap.Result))
+	rowData := make(map[string]string, len(rawResult.Result)-7)
+	sysData := make(map[string]string, 7)
 
-	for s, message := range objMap.Result {
-		var str string
-		err = json.Unmarshal(message, &str)
-		if err == nil {
-			rowData[s] = str
+	for k, message := range rawResult.Result {
+		rv, err := extractRowValue(message)
+		if err != nil {
+			return nil, err
+		}
+		//A small hack :), I'm sure nothing will go wrong here
+		if strings.HasPrefix(k, "sys_") {
+			sysData[k] = rv
 		} else {
-			var ai models.ApprovalItem
-			err = json.Unmarshal(message, &ai)
-			if err != nil {
-				return nil, errors.New(fmt.Sprintf("Unmarshal exploded for result.%s.%v", s, message))
-			}
-			rowData[s] = ai.Value
+			rowData[k] = rv
 		}
 	}
-	return &rowData, nil
+	parsedResult.SysData = sysData
+	parsedResult.RowData = rowData
+	return &parsedResult, nil
+}
+
+func extractRowValue(rm json.RawMessage) (string, error) {
+	var str string
+	err := json.Unmarshal(rm, &str)
+	if err == nil {
+		return str, nil
+	} else {
+		var ai models.ApprovalItem
+		err = json.Unmarshal(rm, &ai)
+		if err != nil {
+			return "", errors.New(fmt.Sprintf("Unmarshal exploded for result.%v", rm))
+		}
+		return ai.Value, nil
+	}
 }

@@ -38,6 +38,16 @@ var DefaultSystemColumns = map[string]*schema.Schema{"table_id": {
 		Type:     schema.TypeString,
 		Optional: true,
 		Computed: true,
+	},
+	"sys_domain": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+	},
+	"sys_class_name": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
 	}}
 
 type ApprovalItem struct {
@@ -47,6 +57,11 @@ type ApprovalItem struct {
 
 type RawResult struct {
 	Result map[string]json.RawMessage `json:"result"`
+}
+
+type ParsedResult struct {
+	SysData map[string]string `json:"sys_data"`
+	RowData map[string]string `json:"row_data"`
 }
 
 func MergeSchema(data1, data2 map[string]*schema.Schema) *map[string]*schema.Schema {
