@@ -24,7 +24,7 @@ commands:
             terraform init -backend-config="token=$TF_token"
 
 jobs:
-  terraTest:
+  test:
     executor: cci-common/ci_image
     steps:
       - checkout
@@ -39,7 +39,7 @@ jobs:
             go test
 
 workflows:
-  terraTest:
+  test:
     jobs:
-      - terraTest:
+      - test:
           context: es02-prod
