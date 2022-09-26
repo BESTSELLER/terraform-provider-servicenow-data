@@ -27,7 +27,7 @@ data "servicenow-data_table_row" "AndreiP" {
 resource "servicenow-data_table_row" "eng-services-vault" {
   table_id = "x_beas_team_engi_0_lasse"
   row_data = {
-    "team": "engineering-services2",
+    "team": "engineering-services",
     "group_id_reader": "cd699222-ce5b-47ba-8d20-da254757c45c"
     "group_id_admin": "a8d94edc-8f08-4db7-a4c1-8e2a00d55795"
     "approvers": "${data.servicenow-data_table_row.LasseG.sys_id},${data.servicenow-data_table_row.AndreiP.sys_id}"

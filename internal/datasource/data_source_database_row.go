@@ -36,12 +36,12 @@ func DatabaseRowDatasource() *schema.Resource {
 
 func DatabaseRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
-	var tableID, rowID string
+	var tableID, sysID string
 	var err error
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 	if data.Id() != "" {
-		tableID, rowID, err = ExtractIDs(data)
+		tableID, sysID, err = ExtractIDs(data)
 		if err != nil {
 			return append(diags, diag.FromErr(err)...)
 		}
@@ -54,8 +54,8 @@ func DatabaseRowRead(_ context.Context, data *schema.ResourceData, m interface{}
 			})
 			return diags
 		}
-		rowID = data.Get("sys_id").(string)
-		if rowID == "" {
+		sysID = data.Get("sys_id").(string)
+		if sysID == "" {
 			return append(diags, diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  "sys_id is mandatory",
@@ -63,14 +63,14 @@ func DatabaseRowRead(_ context.Context, data *schema.ResourceData, m interface{}
 		}
 	}
 
-	rowData, err := c.GetTableRow(tableID, rowID)
+	rowData, err := c.GetTableRow(tableID, sysID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	diags = append(diags, ParsedResultToSchema(data, rowData)...)
 
-	data.SetId(fmt.Sprintf("%s/%s", tableID, rowID))
+	data.SetId(fmt.Sprintf("%s/%s", tableID, sysID))
 
 	return diags
 }
