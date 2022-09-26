@@ -30,6 +30,10 @@ jobs:
       - checkout
       - vault_login
       - run:
+          name: Run go build
+          command: |
+            go build
+      - run:
           name: Run go test
           command: |
             go test
