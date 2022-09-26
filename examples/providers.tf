@@ -14,13 +14,22 @@ provider "servicenow-data" {
 #  sn_api_pass = "..."
 }
 
-data "servicenow-data_table_row" "test" {
-  table_id = "x_beas_team_engi_0_approval_items"
-  sys_id   = "82dc8b2dc3029910a1ec2a4ce0013134"
-
+data "servicenow-data_table_row" "LasseG" {
+  table_id = "sys_user"
+  sys_id   = "7a9dde3e6fa4310005a9fbf7eb3ee495"
 }
 
-resource "local_file" "remote_state" {
-  content  = jsonencode( data.servicenow-data_table_row.test)
-  filename = "data_out.json"
+data "servicenow-data_table_row" "AndreiP" {
+  table_id = "sys_user"
+  sys_id   = "254400dbdb0bc34032fe9ea9db96190b"
+}
+
+resource "servicenow-data_table_row" "eng-services-vault" {
+  table_id = "x_beas_team_engi_0_lasse"
+  row_data = {
+    "team": "engineering-services2",
+    "group_id_reader": "cd699222-ce5b-47ba-8d20-da254757c45c"
+    "group_id_admin": "a8d94edc-8f08-4db7-a4c1-8e2a00d55795"
+    "approvers": "${data.servicenow-data_table_row.LasseG.sys_id},${data.servicenow-data_table_row.AndreiP.sys_id}"
+  }
 }

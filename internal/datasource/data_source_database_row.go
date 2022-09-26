@@ -2,8 +2,10 @@ package datasource
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
+	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strings"
@@ -12,11 +14,7 @@ import (
 // TODO
 func DatabaseRowDatasource() *schema.Resource {
 	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"table_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
+		Schema: *models.MergeSchema(models.DefaultSystemColumns, map[string]*schema.Schema{
 			"sys_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -29,7 +27,7 @@ func DatabaseRowDatasource() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString},
 			},
-		},
+		}),
 		ReadContext:   DatabaseRowRead,
 		Description:   "A row in a SN table",
 		UseJSONNumber: false,
@@ -39,12 +37,14 @@ func DatabaseRowDatasource() *schema.Resource {
 func DatabaseRowRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	var tableID, rowID string
+	var err error
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 	if data.Id() != "" {
-		split := strings.Split(data.Id(), `\`)
-		tableID = split[0]
-		rowID = split[1]
+		tableID, rowID, err = ExtractIDs(data)
+		if err != nil {
+			return append(diags, diag.FromErr(err)...)
+		}
 	} else {
 		tableID = data.Get("table_id").(string)
 		if tableID == "" {
@@ -56,11 +56,10 @@ func DatabaseRowRead(ctx context.Context, data *schema.ResourceData, m interface
 		}
 		rowID = data.Get("sys_id").(string)
 		if rowID == "" {
-			diags = append(diags, diag.Diagnostic{
+			return append(diags, diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  "sys_id is mandatory",
 			})
-			return diags
 		}
 	}
 
@@ -76,4 +75,12 @@ func DatabaseRowRead(ctx context.Context, data *schema.ResourceData, m interface
 	data.SetId(fmt.Sprintf("%s/%s", tableID, rowID))
 
 	return diags
+}
+
+func ExtractIDs(data *schema.ResourceData) (tableID, rowID string, err error) {
+	ids := strings.Split(data.Id(), `/`)
+	if len(ids) != 2 {
+		return "", "", errors.New(fmt.Sprintf("Faulty id!%s", data.Id()))
+	}
+	return ids[0], ids[1], nil
 }

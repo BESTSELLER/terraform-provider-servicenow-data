@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/datasource"
+	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strings"
@@ -19,11 +20,7 @@ func DatabaseRowResource() *schema.Resource {
 		ReadContext:   datasource.DatabaseRowRead,
 		UpdateContext: databaseRowUpdate,
 		DeleteContext: databaseRowDelete,
-		Schema: map[string]*schema.Schema{
-			"table_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
+		Schema: *models.MergeSchema(models.DefaultSystemColumns, map[string]*schema.Schema{
 			"sys_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -36,7 +33,7 @@ func DatabaseRowResource() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString},
 			},
-		},
+		}),
 		SchemaVersion:  1,
 		StateUpgraders: nil,
 		CustomizeDiff:  nil,
@@ -87,9 +84,9 @@ func databaseRowCreate(_ context.Context, d *schema.ResourceData, m interface{})
 		})
 		return diags
 	}
-
 	d.SetId(fmt.Sprintf("%s/%s", tableID, rowID))
-
+	diags = append(diags, diag.Diagnostic{Severity: diag.Warning,
+		Summary: d.Id()})
 	return diags
 }
 
