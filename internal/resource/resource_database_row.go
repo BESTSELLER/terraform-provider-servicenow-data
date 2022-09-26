@@ -12,14 +12,14 @@ import (
 	"time"
 )
 
-const DatabaseRowResourceName = "servicenow-data_table_row"
+const TableRowResourceName = "servicenow-data_table_row"
 
-func DatabaseRowResource() *schema.Resource {
+func TableRowResource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: databaseRowCreate,
-		ReadContext:   datasource.DatabaseRowRead,
-		UpdateContext: databaseRowUpdate,
-		DeleteContext: databaseRowDelete,
+		CreateContext: tableRowCreate,
+		ReadContext:   datasource.TableRowRead,
+		UpdateContext: tableRowUpdate,
+		DeleteContext: tableRowDelete,
 		Schema: *models.MergeSchema(models.DefaultSystemColumns, map[string]*schema.Schema{
 			"sys_id": {
 				Type:     schema.TypeString,
@@ -53,7 +53,7 @@ func DatabaseRowResource() *schema.Resource {
 	}
 }
 
-func databaseRowCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func tableRowCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -81,7 +81,7 @@ func databaseRowCreate(_ context.Context, d *schema.ResourceData, m interface{})
 	return diags
 }
 
-func databaseRowUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func tableRowUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	var tableID, sysID string
 	// Warning or errors can be collected in a slice type
@@ -118,7 +118,7 @@ func databaseRowUpdate(_ context.Context, d *schema.ResourceData, m interface{})
 	return diags
 }
 
-func databaseRowDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func tableRowDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics

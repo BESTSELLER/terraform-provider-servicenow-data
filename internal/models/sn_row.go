@@ -50,7 +50,7 @@ var DefaultSystemColumns = map[string]*schema.Schema{"table_id": {
 		Computed: true,
 	}}
 
-type ApprovalItem struct {
+type ReferenceItem struct {
 	Link  string `json:"link"`
 	Value string `json:"value"`
 }

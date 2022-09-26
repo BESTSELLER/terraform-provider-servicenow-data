@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func DatabaseRowDatasource() *schema.Resource {
+func TableRowDatasource() *schema.Resource {
 	return &schema.Resource{
 		Schema: *models.MergeSchema(models.DefaultSystemColumns, map[string]*schema.Schema{
 			"sys_id": {
@@ -27,13 +27,13 @@ func DatabaseRowDatasource() *schema.Resource {
 					Type: schema.TypeString},
 			},
 		}),
-		ReadContext:   DatabaseRowRead,
+		ReadContext:   TableRowRead,
 		Description:   "A row in a SN table",
 		UseJSONNumber: false,
 	}
 }
 
-func DatabaseRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
+func TableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	var tableID, sysID string
 	var err error

@@ -30,10 +30,10 @@ func ServiceNowDataProvider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			resource.DatabaseRowResourceName: resource.DatabaseRowResource(),
+			resource.TableRowResourceName: resource.TableRowResource(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			resource.DatabaseRowResourceName: datasource.DatabaseRowDatasource(),
+			resource.TableRowResourceName: datasource.TableRowDatasource(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
