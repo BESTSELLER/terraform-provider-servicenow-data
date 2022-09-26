@@ -66,7 +66,7 @@ func databaseRowCreate(_ context.Context, d *schema.ResourceData, m interface{})
 	}
 
 	diags = append(diags, datasource.ParsedResultToSchema(d, insertResult)...)
-	rowID, ok := d.GetOk("sys_id")
+	sysID, ok := d.GetOk("sys_id")
 	if !ok {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -74,8 +74,8 @@ func databaseRowCreate(_ context.Context, d *schema.ResourceData, m interface{})
 		})
 		return diags
 	}
-	err = d.Set("sys_id", rowID)
-	d.SetId(fmt.Sprintf("%s/%s", tableID, rowID))
+	err = d.Set("sys_id", sysID)
+	d.SetId(fmt.Sprintf("%s/%s", tableID, sysID))
 	diags = append(diags, diag.Diagnostic{Severity: diag.Warning,
 		Summary: d.Id()})
 	return diags
@@ -83,7 +83,7 @@ func databaseRowCreate(_ context.Context, d *schema.ResourceData, m interface{})
 
 func databaseRowUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
-	var tableID, rowID string
+	var tableID, sysID string
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
@@ -102,13 +102,13 @@ func databaseRowUpdate(_ context.Context, d *schema.ResourceData, m interface{})
 		return diags
 	}
 
-	tableID, rowID, err := datasource.ExtractIDs(d)
+	tableID, sysID, err := datasource.ExtractIDs(d)
 	if err != nil {
 		return append(diags, diag.FromErr(err)...)
 	}
 
 	tableData := d.Get("row_data")
-	rowData, err := c.UpdateTableRow(tableID, rowID, tableData)
+	rowData, err := c.UpdateTableRow(tableID, sysID, tableData)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -124,9 +124,9 @@ func databaseRowDelete(_ context.Context, d *schema.ResourceData, m interface{})
 	var diags diag.Diagnostics
 	split := strings.Split(d.Id(), `\`)
 	tableID := split[0]
-	rowID := split[1]
+	sysID := split[1]
 
-	err := c.DeleteTableRow(tableID, rowID)
+	err := c.DeleteTableRow(tableID, sysID)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags

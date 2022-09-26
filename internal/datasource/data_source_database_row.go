@@ -75,7 +75,7 @@ func DatabaseRowRead(_ context.Context, data *schema.ResourceData, m interface{}
 	return diags
 }
 
-func ExtractIDs(data *schema.ResourceData) (tableID, rowID string, err error) {
+func ExtractIDs(data *schema.ResourceData) (tableID, sysID string, err error) {
 	ids := strings.Split(data.Id(), `/`)
 	if len(ids) != 2 {
 		return "", "", errors.New(fmt.Sprintf("Faulty id!%s", data.Id()))

@@ -60,8 +60,8 @@ func (client *Client) InsertTableRow(tableName string, tableData interface{}) (*
 	return parseRawData(rawData)
 }
 
-func (client *Client) DeleteTableRow(tableID string, rowID string) error {
-	rowPath := fmt.Sprintf("/table/%s/%s", tableID, rowID)
+func (client *Client) DeleteTableRow(tableID string, sysID string) error {
+	rowPath := fmt.Sprintf("/table/%s/%s", tableID, sysID)
 	_, err := client.sendRequest(http.MethodDelete, rowPath, nil, 204)
 	if err != nil {
 		return err
