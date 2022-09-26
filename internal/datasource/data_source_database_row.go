@@ -40,7 +40,7 @@ func TableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) d
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 	if data.Id() != "" {
-		tableID, sysID, err = ExtractIDs(data)
+		tableID, sysID, err = ExtractIDs(data.Id())
 		if err != nil {
 			return append(diags, diag.FromErr(err)...)
 		}
@@ -74,10 +74,10 @@ func TableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) d
 	return diags
 }
 
-func ExtractIDs(data *schema.ResourceData) (tableID, sysID string, err error) {
-	ids := strings.Split(data.Id(), `/`)
+func ExtractIDs(ID string) (tableID, sysID string, err error) {
+	ids := strings.Split(ID, `/`)
 	if len(ids) != 2 {
-		return "", "", errors.New(fmt.Sprintf("Faulty id!%s", data.Id()))
+		return "", "", errors.New(fmt.Sprintf("Faulty id!%s", ID))
 	}
 	return ids[0], ids[1], nil
 }

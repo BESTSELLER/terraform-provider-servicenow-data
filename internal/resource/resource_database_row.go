@@ -102,7 +102,7 @@ func tableRowUpdate(_ context.Context, d *schema.ResourceData, m interface{}) di
 		return diags
 	}
 
-	tableID, sysID, err := datasource.ExtractIDs(d)
+	tableID, sysID, err := datasource.ExtractIDs(d.Id())
 	if err != nil {
 		return append(diags, diag.FromErr(err)...)
 	}
