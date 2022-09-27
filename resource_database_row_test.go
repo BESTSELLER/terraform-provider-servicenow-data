@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
-	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/datasource"
 	resource2 "github.com/BESTSELLER/terraform-provider-servicenow-data/internal/resource"
 	"testing"
 
@@ -38,7 +37,7 @@ func testAccCheckRowDestroy(s *terraform.State) error {
 			continue
 		}
 
-		tableID, rowID, err := datasource.ExtractIDs(rs.Primary.ID)
+		tableID, rowID, err := resource2.ExtractIDs(rs.Primary.ID)
 
 		if err != nil {
 			return err

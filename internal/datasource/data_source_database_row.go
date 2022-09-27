@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
+	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
 )
 
 func TableRowDatasource() *schema.Resource {
@@ -16,6 +16,7 @@ func TableRowDatasource() *schema.Resource {
 			"sys_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"row_data": {
 				Description: "Columns",
@@ -34,55 +35,39 @@ func TableRowDatasource() *schema.Resource {
 
 func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
-	var tableID, sysID string
 	var err error
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-
-	tableID = data.Get("table_id").(string)
-	if tableID == "" {
+	var payload map[string]interface{}
+	tableID, ok := data.GetOk("table_id")
+	if !ok {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "tableID is mandatory",
 		})
 		return diags
 	}
-	sysID = data.Get("sys_id").(string)
-	if sysID == "" {
-		return append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "sys_id is mandatory",
-		})
+	sysID, ok := data.GetOk("sys_id")
+	if !ok {
+		payload = data.Get("row_data").(map[string]interface{})
+		if payload == nil || len(payload) == 0 {
+			return append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "sys_id or row_data is mandatory",
+			})
+		}
+	} else {
+		payload = map[string]interface{}{"sys_id": sysID}
 	}
 
-	rowData, err := c.GetTableRow(tableID, sysID)
+	rowData, err := c.GetTableRow(tableID.(string), payload)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	diags = append(diags, ParsedResultToSchema(data, rowData)...)
+	diags = append(diags, resource.ParsedResultToSchema(data, rowData)...)
 
-	data.SetId(fmt.Sprintf("%s/%s", tableID, sysID))
+	data.SetId(fmt.Sprintf("%s/%s", tableID, rowData.SysData["sys_id"]))
 
 	return diags
-}
-
-func ExtractIDs(ID string) (tableID, sysID string, err error) {
-	ids := strings.Split(ID, `/`)
-	if len(ids) != 2 {
-		return "", "", fmt.Errorf("faulty id!%s", ID)
-	}
-	return ids[0], ids[1], nil
-}
-
-func ParsedResultToSchema(d *schema.ResourceData, result *models.ParsedResult) diag.Diagnostics {
-	for k, v := range result.SysData {
-		if err := d.Set(k, v); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-	if err := d.Set("row_data", result.RowData); err != nil {
-		return diag.FromErr(err)
-	}
-	return nil
 }

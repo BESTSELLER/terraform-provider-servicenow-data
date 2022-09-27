@@ -60,6 +60,10 @@ type RawResult struct {
 	Result map[string]json.RawMessage `json:"result"`
 }
 
+type RawResultList struct {
+	Result []map[string]json.RawMessage `json:"result"`
+}
+
 type ParsedResult struct {
 	SysData map[string]string `json:"sys_data"`
 	RowData map[string]string `json:"row_data"`

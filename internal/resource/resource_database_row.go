@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
-	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/datasource"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -65,7 +64,7 @@ func tableRowCreate(_ context.Context, d *schema.ResourceData, m interface{}) di
 		return diag.FromErr(err)
 	}
 
-	diags = append(diags, datasource.ParsedResultToSchema(d, insertResult)...)
+	diags = append(diags, ParsedResultToSchema(d, insertResult)...)
 	sysID, ok := d.GetOk("sys_id")
 	if !ok {
 		diags = append(diags, diag.Diagnostic{
@@ -87,17 +86,17 @@ func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) d
 	var err error
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	tableID, sysID, err = datasource.ExtractIDs(data.Id())
+	tableID, sysID, err = ExtractIDs(data.Id())
 	if err != nil {
 		return append(diags, diag.FromErr(err)...)
 	}
 
-	rowData, err := c.GetTableRow(tableID, sysID)
+	rowData, err := c.GetTableRow(tableID, map[string]interface{}{"sys_id": sysID})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	diags = append(diags, datasource.ParsedResultToSchema(data, rowData)...)
+	diags = append(diags, ParsedResultToSchema(data, rowData)...)
 
 	data.SetId(fmt.Sprintf("%s/%s", tableID, sysID))
 
@@ -125,7 +124,7 @@ func tableRowUpdate(_ context.Context, d *schema.ResourceData, m interface{}) di
 		return diags
 	}
 
-	tableID, sysID, err := datasource.ExtractIDs(d.Id())
+	tableID, sysID, err := ExtractIDs(d.Id())
 	if err != nil {
 		return append(diags, diag.FromErr(err)...)
 	}
@@ -136,7 +135,7 @@ func tableRowUpdate(_ context.Context, d *schema.ResourceData, m interface{}) di
 		return diag.FromErr(err)
 	}
 
-	diags = append(diags, datasource.ParsedResultToSchema(d, rowData)...)
+	diags = append(diags, ParsedResultToSchema(d, rowData)...)
 
 	return diags
 }
@@ -155,4 +154,24 @@ func tableRowDelete(_ context.Context, d *schema.ResourceData, m interface{}) di
 		return diags
 	}
 	return diags
+}
+
+func ExtractIDs(ID string) (tableID, sysID string, err error) {
+	ids := strings.Split(ID, `/`)
+	if len(ids) != 2 {
+		return "", "", fmt.Errorf("faulty id!%s", ID)
+	}
+	return ids[0], ids[1], nil
+}
+
+func ParsedResultToSchema(d *schema.ResourceData, result *models.ParsedResult) diag.Diagnostics {
+	for k, v := range result.SysData {
+		if err := d.Set(k, v); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+	if err := d.Set("row_data", result.RowData); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }

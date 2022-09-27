@@ -37,17 +37,25 @@ func NewClient(url, user, pass string) *Client {
 	}
 }
 
-func (client *Client) GetTableRow(tableName, sysID string) (*models.ParsedResult, error) {
-	rowPath := fmt.Sprintf("/table/%s/%s", tableName, sysID)
+func (client *Client) GetTableRow(tableID string, params map[string]interface{}) (*models.ParsedResult, error) {
+	if params == nil || len(params) == 0 {
+		return nil, fmt.Errorf("sys_id and params cannot be both empty")
+	}
+	query := "?"
+	for k, v := range params {
+		query = fmt.Sprintf("%s&%s=%s", query, k, v)
+	}
+	rowPath := fmt.Sprintf("/table/%s%s", tableID, query)
+
 	rawData, err := client.sendRequest(http.MethodGet, rowPath, nil, 200)
 	if err != nil {
 		return nil, err
 	}
-	return parseRawData(rawData)
+	return parseRawListData(rawData)
 }
 
-func (client *Client) InsertTableRow(tableName string, tableData interface{}) (*models.ParsedResult, error) {
-	rowPath := fmt.Sprintf("/table/%s", tableName)
+func (client *Client) InsertTableRow(tableID string, tableData interface{}) (*models.ParsedResult, error) {
+	rowPath := fmt.Sprintf("/table/%s", tableID)
 	rawData, err := client.sendRequest(http.MethodPost, rowPath, tableData, 201)
 	if err != nil {
 		return nil, err
@@ -101,8 +109,8 @@ func (client *Client) sendRequest(method, path string, payload interface{}, expe
 	return &body, nil
 }
 
-func (client *Client) UpdateTableRow(tableName, sysID string, payload interface{}) (*models.ParsedResult, error) {
-	rowPath := fmt.Sprintf("/table/%s/%s", tableName, sysID)
+func (client *Client) UpdateTableRow(tableID, sysID string, payload interface{}) (*models.ParsedResult, error) {
+	rowPath := fmt.Sprintf("/table/%s/%s", tableID, sysID)
 	rawData, err := client.sendRequest(http.MethodPut, rowPath, payload, 200)
 	if err != nil {
 		return nil, err
@@ -112,15 +120,40 @@ func (client *Client) UpdateTableRow(tableName, sysID string, payload interface{
 
 func parseRawData(rawData *[]byte) (*models.ParsedResult, error) {
 	var rawResult models.RawResult
-	var parsedResult = models.ParsedResult{}
 	err := json.Unmarshal(*rawData, &rawResult)
 	if err != nil {
 		return nil, err
 	}
-	rowData := make(map[string]string, len(rawResult.Result)-7)
-	sysData := make(map[string]string, 7)
 
-	for k, message := range rawResult.Result {
+	result, err := rawMapParse(rawResult.Result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func parseRawListData(rawData *[]byte) (*models.ParsedResult, error) {
+	var rawResult models.RawResultList
+	err := json.Unmarshal(*rawData, &rawResult)
+	if err != nil {
+		return nil, err
+	}
+	if len(rawResult.Result) != 1 {
+		return nil, fmt.Errorf("received more than one row as result, make sure your query returns a single item")
+	}
+
+	result, err := rawMapParse(rawResult.Result[0])
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func rawMapParse(rawResult map[string]json.RawMessage) (*models.ParsedResult, error) {
+	var parsedResult = models.ParsedResult{}
+	rowData := make(map[string]string, len(rawResult)-7)
+	sysData := make(map[string]string, 7)
+	for k, message := range rawResult {
 		rv, err := extractRowValue(message)
 		if err != nil {
 			return nil, err
