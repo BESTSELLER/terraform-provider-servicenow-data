@@ -13,10 +13,6 @@ import (
 	"time"
 )
 
-func init() {
-
-}
-
 // Client holds the client info for netbox
 type Client struct {
 	url  string
@@ -69,7 +65,7 @@ func (client *Client) DeleteTableRow(tableID string, sysID string) error {
 	return nil
 }
 
-func (client *Client) sendRequest(method, path string, payload interface{}, statusCode int) (value *[]byte, err error) {
+func (client *Client) sendRequest(method, path string, payload interface{}, expectedStatusCode int) (value *[]byte, err error) {
 	url := client.url + "/api/now" + path
 
 	b := new(bytes.Buffer)
@@ -97,9 +93,9 @@ func (client *Client) sendRequest(method, path string, payload interface{}, stat
 		return nil, err
 	}
 
-	if statusCode != 0 {
-		if resp.StatusCode != statusCode {
-			return nil, fmt.Errorf("[ERROR] unexpected status code got: %v expected: %v  \n %v  \n %v", resp.StatusCode, statusCode, string(body), url)
+	if expectedStatusCode != 0 {
+		if resp.StatusCode != expectedStatusCode {
+			return nil, fmt.Errorf("[ERROR] unexpected status code got: %v expected: %v  \n %v  \n %v", resp.StatusCode, expectedStatusCode, string(body), url)
 		}
 	}
 
