@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
 	"io"

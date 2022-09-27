@@ -5,10 +5,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var DefaultSystemColumns = map[string]*schema.Schema{"table_id": {
-	Type:     schema.TypeString,
-	Required: true,
-},
+var DefaultSystemColumns = map[string]*schema.Schema{
+	"table_id": {
+		Type:     schema.TypeString,
+		Required: true,
+	},
 	"sys_created_by": {
 		Type:     schema.TypeString,
 		Optional: true,

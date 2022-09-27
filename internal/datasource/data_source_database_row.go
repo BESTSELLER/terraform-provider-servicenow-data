@@ -2,7 +2,6 @@ package datasource
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
@@ -77,7 +76,7 @@ func TableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) d
 func ExtractIDs(ID string) (tableID, sysID string, err error) {
 	ids := strings.Split(ID, `/`)
 	if len(ids) != 2 {
-		return "", "", errors.New(fmt.Sprintf("Faulty id!%s", ID))
+		return "", "", fmt.Errorf("faulty id!%s", ID)
 	}
 	return ids[0], ids[1], nil
 }
