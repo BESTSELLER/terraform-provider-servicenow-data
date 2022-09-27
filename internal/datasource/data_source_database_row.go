@@ -26,39 +26,33 @@ func TableRowDatasource() *schema.Resource {
 					Type: schema.TypeString},
 			},
 		}),
-		ReadContext:   TableRowRead,
+		ReadContext:   tableRowRead,
 		Description:   "A row in a SN table",
 		UseJSONNumber: false,
 	}
 }
 
-func TableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
+func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*client.Client)
 	var tableID, sysID string
 	var err error
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	if data.Id() != "" {
-		tableID, sysID, err = ExtractIDs(data.Id())
-		if err != nil {
-			return append(diags, diag.FromErr(err)...)
-		}
-	} else {
-		tableID = data.Get("table_id").(string)
-		if tableID == "" {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "tableID is mandatory",
-			})
-			return diags
-		}
-		sysID = data.Get("sys_id").(string)
-		if sysID == "" {
-			return append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "sys_id is mandatory",
-			})
-		}
+
+	tableID = data.Get("table_id").(string)
+	if tableID == "" {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "tableID is mandatory",
+		})
+		return diags
+	}
+	sysID = data.Get("sys_id").(string)
+	if sysID == "" {
+		return append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "sys_id is mandatory",
+		})
 	}
 
 	rowData, err := c.GetTableRow(tableID, sysID)

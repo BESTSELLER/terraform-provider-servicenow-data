@@ -17,7 +17,7 @@ const TableRowResourceName = "servicenow-data_table_row"
 func TableRowResource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: tableRowCreate,
-		ReadContext:   datasource.TableRowRead,
+		ReadContext:   tableRowRead,
 		UpdateContext: tableRowUpdate,
 		DeleteContext: tableRowDelete,
 		Schema: *models.MergeSchema(models.DefaultSystemColumns, map[string]*schema.Schema{
@@ -78,6 +78,29 @@ func tableRowCreate(_ context.Context, d *schema.ResourceData, m interface{}) di
 	d.SetId(fmt.Sprintf("%s/%s", tableID, sysID))
 	diags = append(diags, diag.Diagnostic{Severity: diag.Warning,
 		Summary: d.Id()})
+	return diags
+}
+
+func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*client.Client)
+	var tableID, sysID string
+	var err error
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+	tableID, sysID, err = datasource.ExtractIDs(data.Id())
+	if err != nil {
+		return append(diags, diag.FromErr(err)...)
+	}
+
+	rowData, err := c.GetTableRow(tableID, sysID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	diags = append(diags, datasource.ParsedResultToSchema(data, rowData)...)
+
+	data.SetId(fmt.Sprintf("%s/%s", tableID, sysID))
+
 	return diags
 }
 
