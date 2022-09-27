@@ -151,7 +151,7 @@ func extractRowValue(rm json.RawMessage) (string, error) {
 		var ai models.ReferenceItem
 		err = json.Unmarshal(rm, &ai)
 		if err != nil {
-			return "", errors.New(fmt.Sprintf("Unmarshal exploded for result.%v", rm))
+			return "", fmt.Errorf("Unmarshal exploded for result.%v", rm)
 		}
 		return ai.Value, nil
 	}
