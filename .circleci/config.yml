@@ -1,0 +1,45 @@
+version: 2.1
+
+orbs:
+  secret-injector: bestsellerit/secret-injector@2.0.6
+  cci-common: bestsellerit/cci-common@1.4.8
+
+commands:
+  vault_login:
+    description: Login user VAULT_USERNAME, VAULT_PASSWORD and VAULT_ADDR
+    steps:
+      - run:
+          name: Vault login
+          command: |
+            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
+
+  terraform_init:
+    description: Initialaizing the back-end
+    steps:
+      - run:
+          name: Initialaizing the back-end
+          command: |
+            source ${BASH_ENV}
+            sed -i -e "s?\$WORKSPACE?$TF_VAR_internal_name?g" backend.tf
+            terraform init -backend-config="token=$TF_token"
+
+jobs:
+  test:
+    executor: cci-common/ci_image
+    steps:
+      - checkout
+      - vault_login
+      - run:
+          name: Run go build
+          command: |
+            go build
+      - run:
+          name: Run go test
+          command: |
+            go test
+
+workflows:
+  test:
+    jobs:
+      - test:
+          context: es02-prod
