@@ -53,9 +53,9 @@ jobs:
     executor: cci-common/ci_image
     steps:
       - checkout
-      - vault_login
       - attach_workspace:
           at: /tmp
+      - vault_login
       - run:
           name: Run go build
           command: |
@@ -86,7 +86,6 @@ my_context: &my_context es02-prod
 
 dump_secrets: &dump_secrets
   vault-path: ES/data/terraform-provider/prod
-  format: env
 
 test_filter: &test_filter
   filters:
