@@ -24,9 +24,9 @@ terraform {
   required_version = ">= 0.13"
 }
 provider "servicenow-data" {
-  sn_api_url  = "https://bestsellerdev.service-now.com/"
-  sn_api_user = "int_tes"
-  sn_api_pass = "HVOGOqeYfHZxqqdM^oTlvmF=FGD%CZryJG<$W#7p"
+  sn_api_url  = "..."
+  sn_api_user = "..."
+  sn_api_pass = "..."
 }
 ```
 
