@@ -141,7 +141,7 @@ func parseRawListData(rawData *[]byte) (*models.ParsedResult, error) {
 
 	switch len(rawResult.Result) {
 	case 0:
-		return nil, nil
+		return &models.ParsedResult{SysData: map[string]string{}, RowData: map[string]string{}}, nil
 	case 1:
 		break
 	default:

@@ -65,6 +65,12 @@ func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) d
 		return diag.FromErr(err)
 	}
 
+	if _, exists := (*rowData).SysData["sys_id"]; !exists {
+		return append(diags, diag.Diagnostics{diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  fmt.Sprintf("No row found in ServiceNow for %+v - %+v", data.Get("sys_id"), data.Get("row_data")),
+		}}...)
+	}
 	diags = append(diags, resource.ParsedResultToSchema(data, rowData)...)
 
 	data.SetId(fmt.Sprintf("%s/%s", tableID, rowData.SysData["sys_id"]))
