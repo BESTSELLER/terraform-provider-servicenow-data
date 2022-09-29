@@ -30,7 +30,7 @@ commands:
       - run:
           name: Install GoReleaser
           command: |
-            curl -sfL https://goreleaser.com/static/run
+            wget -sfL https://goreleaser.com/static/run
             mv ./run /usr/bin/goreleaser
       - run:
           name: Import private key
