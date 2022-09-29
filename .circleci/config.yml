@@ -108,7 +108,7 @@ workflows:
           <<: *test_filter
       - test:
           requires:
-            - test
+            - secret-injector/dump-secrets
           context: *my_context
           <<: *test_filter
       - build:
@@ -116,7 +116,6 @@ workflows:
           release-type: test
           name: test-publish
           requires:
-            - secret-injector/dump-secrets
             - test
           <<: *test_filter
   build-n-release:
@@ -127,7 +126,7 @@ workflows:
           <<: *release_filter
       - test:
           requires:
-            - test
+            - secret-injector/dump-secrets
           context: *my_context
           <<: *release_filter
       - build:
@@ -135,6 +134,5 @@ workflows:
           name: build
           release-type: release
           requires:
-            - secret-injector/dump-secrets
             - test
           <<: *release_filter
