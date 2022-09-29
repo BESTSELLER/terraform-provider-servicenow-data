@@ -31,7 +31,7 @@ commands:
           name: Install GoReleaser
           command: |
             wget https://goreleaser.com/static/run
-            mv ./run /usr/bin/goreleaser
+            sudo mv ./run /usr/bin/goreleaser
       - run:
           name: Import private key
           command: |
