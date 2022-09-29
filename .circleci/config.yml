@@ -84,7 +84,7 @@ tag_filter: &tag_filter /v[0-9]+.[0-9]+.[0-9]+/
 my_context: &my_context es02-prod
 
 dump_secrets: &dump_secrets
-  vault-path: ES/terraform-provider/prod
+  vault-path: ES/data/terraform-provider/prod
   format: env
 
 test_filter: &test_filter
