@@ -54,6 +54,8 @@ jobs:
     steps:
       - checkout
       - vault_login
+      - attach_workspace:
+          at: /tmp
       - run:
           name: Run go build
           command: |
