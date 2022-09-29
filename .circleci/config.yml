@@ -107,8 +107,10 @@ workflows:
           context: *my_context
           <<: *test_filter
       - test:
+          context: *my_context
           <<: *test_filter
       - build:
+          context: *my_context
           release-type: test
           name: test-publish
           requires:
@@ -122,8 +124,10 @@ workflows:
           context: *my_context
           <<: *release_filter
       - test:
+          context: *my_context
           <<: *release_filter
       - build:
+          context: *my_context
           name: build
           release-type: release
           requires:
