@@ -30,7 +30,7 @@ commands:
       - run:
           name: Install GoReleaser
           command: |
-            curl -sfL https://goreleaser.com/static/run
+            wget https://goreleaser.com/static/run
             chmod +x ./run
             sudo mv ./run /usr/bin/goreleaser
       - run:
