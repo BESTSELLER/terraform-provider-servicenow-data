@@ -2,26 +2,8 @@ version: 2.1
 
 orbs:
   secret-injector: bestsellerit/secret-injector@2.0.6
-  cci-common: bestsellerit/cci-common@1.4.8
 
 commands:
-  vault_login:
-    description: Login user VAULT_USERNAME, VAULT_PASSWORD and VAULT_ADDR
-    steps:
-      - run:
-          name: Vault login
-          command: |
-            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
-
-  terraform_init:
-    description: Initialaizing the back-end
-    steps:
-      - run:
-          name: Initialaizing the back-end
-          command: |
-            source ${BASH_ENV}
-            sed -i -e "s?\$WORKSPACE?$TF_VAR_internal_name?g" backend.tf
-            terraform init -backend-config="token=$TF_token"
   goreleaser:
     parameters:
       release-type:
@@ -48,21 +30,7 @@ commands:
             else
               goreleaser release --rm-dist
             fi
-
 jobs:
-  test:
-    executor: cci-common/ci_image
-    steps:
-      - checkout
-      - vault_login
-      - run:
-          name: Run go build
-          command: |
-            go build
-      - run:
-          name: Run go test
-          command: |
-            go test
   build:
     parameters:
       release-type:
@@ -70,14 +38,13 @@ jobs:
         enum: ["test", "release"]
         default: "test"
     docker:
-      - image: cimg/go:1.19
+      - image: cimg/go:1.15
     steps:
       - checkout
       - attach_workspace:
           at: /tmp
       - goreleaser:
           release-type: << parameters.release-type >>
-
 
 
 tag_filter: &tag_filter /v[0-9]+.[0-9]+.[0-9]+/
@@ -106,17 +73,11 @@ workflows:
           <<: *dump_secrets
           context: *my_context
           <<: *test_filter
-      - test:
+      - build:
+          release-type: test
+          name: test
           requires:
             - secret-injector/dump-secrets
-          context: *my_context
-          <<: *test_filter
-      - build:
-          context: *my_context
-          release-type: test
-          name: test-publish
-          requires:
-            - test
           <<: *test_filter
   build-n-release:
     jobs:
@@ -124,15 +85,9 @@ workflows:
           <<: *dump_secrets
           context: *my_context
           <<: *release_filter
-      - test:
-          requires:
-            - secret-injector/dump-secrets
-          context: *my_context
-          <<: *release_filter
       - build:
-          context: *my_context
           name: build
           release-type: release
           requires:
-            - test
+            - secret-injector/dump-secrets
           <<: *release_filter
