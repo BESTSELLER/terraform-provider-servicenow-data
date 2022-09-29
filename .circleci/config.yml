@@ -22,6 +22,32 @@ commands:
             source ${BASH_ENV}
             sed -i -e "s?\$WORKSPACE?$TF_VAR_internal_name?g" backend.tf
             terraform init -backend-config="token=$TF_token"
+  goreleaser:
+    parameters:
+      release-type:
+        type: string
+    steps:
+      - run:
+          name: Install GoReleaser
+          command: |
+            curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh
+            sudo mv ./bin/goreleaser /usr/bin/goreleaser
+            rm -rf ./bin
+      - run:
+          name: Import private key
+          command: |
+            source /tmp/secrets.env
+            echo -e "$GPG_PRIVATE_KEY" | base64 --decode > $HOME/private.key
+            gpg --pinentry-mode loopback --batch --yes --import $HOME/private.key
+      - run:
+          name: Run GoReleaser
+          command: |
+            source /tmp/secrets.env
+            if [ "<< parameters.release-type >>" = "test" ] ; then
+              goreleaser release --snapshot --rm-dist
+            else
+              goreleaser release --rm-dist
+            fi
 
 jobs:
   test:
@@ -37,9 +63,70 @@ jobs:
           name: Run go test
           command: |
             go test
+    build:
+      parameters:
+        release-type:
+          type: enum
+          enum: ["test", "release"]
+          default: "test"
+      docker:
+        - image: cimg/go:1.19
+      steps:
+        - checkout
+        - attach_workspace:
+            at: /tmp
+        - goreleaser:
+            release-type: << parameters.release-type >>
+
+
+
+tag_filter: &tag_filter /v[0-9]+.[0-9]+.[0-9]+/
+my_context: &my_context es02-prod
+
+dump_secrets: &dump_secrets
+  vault-path: ES/terraform-provider/prod
+  output-type: env
+
+test_filter: &test_filter
+  filters:
+    tags:
+      ignore: *tag_filter
+release_filter: &release_filter
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: *tag_filter
 
 workflows:
-  test:
+  version: 2
+  tester:
     jobs:
+      - secret-injector/dump-secrets:
+          <<: *dump_secrets
+          context: *my_context
+          <<: *test_filter
       - test:
-          context: es02-prod
+          <<: *test_filter
+      - build:
+          release-type: test
+          name: test-publish
+          requires:
+            - secret-injector/dump-secrets
+            - test
+          <<: *test_filter
+  build-n-release:
+    jobs:
+      - secret-injector/dump-secrets:
+          <<: *dump_secrets
+          context: *my_context
+          <<: *release_filter
+      - test:
+          <<: *release_filter
+      - build:
+          name: build
+          release-type: release
+          requires:
+            - secret-injector/dump-secrets
+            - test
+          <<: *release_filter
