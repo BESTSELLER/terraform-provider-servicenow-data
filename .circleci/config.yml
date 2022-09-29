@@ -63,20 +63,20 @@ jobs:
           name: Run go test
           command: |
             go test
-    build:
-      parameters:
-        release-type:
-          type: enum
-          enum: ["test", "release"]
-          default: "test"
-      docker:
-        - image: cimg/go:1.19
-      steps:
-        - checkout
-        - attach_workspace:
-            at: /tmp
-        - goreleaser:
-            release-type: << parameters.release-type >>
+  build:
+    parameters:
+      release-type:
+        type: enum
+        enum: ["test", "release"]
+        default: "test"
+    docker:
+      - image: cimg/go:1.19
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp
+      - goreleaser:
+          release-type: << parameters.release-type >>
 
 
 
