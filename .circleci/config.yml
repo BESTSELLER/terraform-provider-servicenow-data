@@ -32,7 +32,6 @@ commands:
           command: |
             curl -sfL https://goreleaser.com/static/run
             mv ./goreleaser /usr/bin/goreleaser
-            rm -rf ./bin
       - run:
           name: Import private key
           command: |
