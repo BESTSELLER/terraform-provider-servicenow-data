@@ -31,6 +31,7 @@ commands:
           name: Install GoReleaser
           command: |
             curl -sfL https://goreleaser.com/static/run
+            chmod +x ./run
             sudo mv ./run /usr/bin/goreleaser
       - run:
           name: Import private key
