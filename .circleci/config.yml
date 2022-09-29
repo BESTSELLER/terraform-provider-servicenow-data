@@ -107,6 +107,8 @@ workflows:
           context: *my_context
           <<: *test_filter
       - test:
+          requires:
+            - test
           context: *my_context
           <<: *test_filter
       - build:
@@ -124,6 +126,8 @@ workflows:
           context: *my_context
           <<: *release_filter
       - test:
+          requires:
+            - test
           context: *my_context
           <<: *release_filter
       - build:
