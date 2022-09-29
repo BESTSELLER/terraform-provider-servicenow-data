@@ -175,6 +175,12 @@ func ExtractIDs(ID string) (tableID, sysID string, err error) {
 }
 
 func ParsedResultToSchema(d *schema.ResourceData, result *models.ParsedResult) diag.Diagnostics {
+	if result == nil {
+		return diag.Diagnostics{diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "No row found in SN",
+		}}
+	}
 	for k, v := range result.SysData {
 		if err := d.Set(k, v); err != nil {
 			return diag.FromErr(err)

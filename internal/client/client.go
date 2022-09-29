@@ -138,7 +138,13 @@ func parseRawListData(rawData *[]byte) (*models.ParsedResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(rawResult.Result) != 1 {
+
+	switch len(rawResult.Result) {
+	case 0:
+		return nil, nil
+	case 1:
+		break
+	default:
 		return nil, fmt.Errorf("received more than one row as result, make sure your query returns a single item")
 	}
 
