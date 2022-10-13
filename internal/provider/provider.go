@@ -75,6 +75,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 			Summary:  "sn_api_url - Missing required config",
 		})
 	}
+	if diags.HasError() {
+		return nil, diags
+	}
 
 	c := client.NewClient(*host, *username, *password)
 
