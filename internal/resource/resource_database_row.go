@@ -175,10 +175,16 @@ func ExtractIDs(ID string) (tableID, sysID string, err error) {
 }
 
 func ParsedResultToSchema(d *schema.ResourceData, result *models.ParsedResult) diag.Diagnostics {
+	if len(result.SysData) == 0 {
+		return nil
+	}
 	for k, v := range result.SysData {
 		if err := d.Set(k, v); err != nil {
 			return diag.FromErr(err)
 		}
+	}
+	if len(result.RowData) == 0 {
+		return nil
 	}
 	if err := d.Set("row_data", result.RowData); err != nil {
 		return diag.FromErr(err)
