@@ -154,11 +154,12 @@ func tableRowDelete(_ context.Context, d *schema.ResourceData, m interface{}) di
 	c := m.(*client.Client)
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	split := strings.Split(d.Id(), `\`)
-	tableID := split[0]
-	sysID := split[1]
-
-	err := c.DeleteTableRow(tableID, sysID)
+	tableID, sysID, err := ExtractIDs(d.Id())
+	if err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+		return diags
+	}
+	err = c.DeleteTableRow(tableID, sysID)
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 		return diags
