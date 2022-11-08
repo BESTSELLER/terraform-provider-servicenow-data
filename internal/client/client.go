@@ -65,14 +65,14 @@ func (client *Client) InsertTableRow(tableID string, tableData interface{}) (*mo
 
 func (client *Client) DeleteTableRow(tableID string, sysID string) error {
 	rowPath := fmt.Sprintf("/table/%s/%s", tableID, sysID)
-	_, err := client.sendRequest(http.MethodDelete, rowPath, nil, 204)
+	_, err := client.sendRequest(http.MethodDelete, rowPath, nil, 204, 404)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (client *Client) sendRequest(method, path string, payload interface{}, expectedStatusCode int) (value *[]byte, err error) {
+func (client *Client) sendRequest(method, path string, payload interface{}, expectedStatusCodes ...int) (value *[]byte, err error) {
 	url := client.url + "/api/now" + path
 
 	b := new(bytes.Buffer)
@@ -100,12 +100,14 @@ func (client *Client) sendRequest(method, path string, payload interface{}, expe
 		return nil, err
 	}
 
-	if expectedStatusCode != 0 {
-		if resp.StatusCode != expectedStatusCode {
-			return nil, fmt.Errorf("[ERROR] unexpected status code got: %v expected: %v  \n %v  \n %v", resp.StatusCode, expectedStatusCode, string(body), url)
+	if len(expectedStatusCodes) > 0 {
+		for _, code := range expectedStatusCodes {
+			if resp.StatusCode == code {
+				return &body, nil
+			}
 		}
+		return nil, fmt.Errorf("[ERROR] unexpected status code got: %v expected: %v  \n %v  \n %v", resp.StatusCode, expectedStatusCodes, string(body), url)
 	}
-
 	return &body, nil
 }
 
