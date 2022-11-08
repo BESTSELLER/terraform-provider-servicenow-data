@@ -98,14 +98,16 @@ func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) d
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	parseResultDiag := ParsedResultToSchema(data, rowData)
-	diags = append(diags, parseResultDiag...)
-	if len(parseResultDiag) > 0 {
-		return diags
+	if len(rowData.SysData) == 0 {
+		data.SetId("")
+	} else {
+		parseResultDiag := ParsedResultToSchema(data, rowData)
+		diags = append(diags, parseResultDiag...)
+		if len(parseResultDiag) > 0 {
+			return diags
+		}
+		data.SetId(fmt.Sprintf("%s/%s", tableID, sysID))
 	}
-	data.SetId(fmt.Sprintf("%s/%s", tableID, sysID))
-
 	return diags
 }
 

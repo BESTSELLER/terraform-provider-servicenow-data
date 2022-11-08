@@ -102,7 +102,7 @@ func (client *Client) sendRequest(method, path string, payload interface{}, expe
 
 	if len(expectedStatusCodes) > 0 {
 		for _, code := range expectedStatusCodes {
-			if resp.StatusCode != code {
+			if resp.StatusCode == code {
 				return &body, nil
 			}
 		}
@@ -143,7 +143,7 @@ func parseRawListData(rawData *[]byte) (*models.ParsedResult, error) {
 
 	switch len(rawResult.Result) {
 	case 0:
-		return &models.ParsedResult{SysData: map[string]string{}, RowData: map[string]string{}}, nil
+		return &models.ParsedResult{SysData: nil, RowData: nil}, nil
 	case 1:
 		break
 	default:
