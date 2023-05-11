@@ -6,7 +6,8 @@ metadata:
   description: Terraform provider that can manage data in any SN table it can Read/Write
   annotations:
     github.com/project-slug: BESTSELLER/terraform-provider-servicenow-data
+    circleci.com/project-slug: github/BESTSELLER/terraform-provider-servicenow-data
 spec:
   type: service
-  lifecycle: experimental
-  owner: 
+  lifecycle: production
+  owner: engineering-services
