@@ -90,7 +90,9 @@ func (client *Client) sendRequest(method, path string, payload interface{}, expe
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := httpClient.Do(req)
-	defer resp.Body.Close()
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, err
 	}
