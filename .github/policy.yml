@@ -1,0 +1,34 @@
+policy:
+  approval:
+    - and:
+        - or:
+            - tests passed
+            - engineering services has approved
+        - or:
+            - engineering services has approved
+            - dependabot is making the PR
+  disapproval:
+    requires:
+      organizations:
+        - "bestseller"
+approval_rules:
+  - name: tests passed
+    if:
+      has_successful_status:
+        - "tester"
+        - "GitGuardian Security Checks"
+    requires:
+      count: 0
+  - name: engineering services has approved
+    requires:
+      count: 1
+      teams:
+        - "BESTSELLER/engineering-services"
+  - name: dependabot is making the PR
+    if:
+      has_author_in:
+        users:
+          - "dependabot[bot]"
+          - "dependabot-circleci[bot]"
+    requires:
+      count: 0
