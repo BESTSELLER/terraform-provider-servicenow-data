@@ -10,13 +10,17 @@ updates:
     schedule:
       interval: "monthly"
     reviewers: 
-      - BESTSELLER/engineering-services 
+      - BESTSELLER/engineering-services
+    labels:
+      - automerge
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
     reviewers: 
-      - BESTSELLER/engineering-services 
+      - BESTSELLER/engineering-services
+    labels:
+      - automerge
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
     open-pull-requests-limit: 10
@@ -24,3 +28,5 @@ updates:
       interval: "monthly"
     reviewers: 
       - BESTSELLER/engineering-services
+    labels:
+      - automerge
