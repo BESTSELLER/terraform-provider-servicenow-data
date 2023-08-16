@@ -5,23 +5,6 @@ orbs:
   cci-common: bestsellerit/cci-common@1.13.2
 
 commands:
-  vault_login:
-    description: Login user VAULT_USERNAME, VAULT_PASSWORD and VAULT_ADDR
-    steps:
-      - run:
-          name: Vault login
-          command: |
-            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
-
-  terraform_init:
-    description: Initialaizing the back-end
-    steps:
-      - run:
-          name: Initialaizing the back-end
-          command: |
-            source ${BASH_ENV}
-            sed -i -e "s?\$WORKSPACE?$TF_VAR_internal_name?g" backend.tf
-            terraform init -backend-config="token=$TF_token"
   goreleaser:
     parameters:
       release-type:
@@ -56,7 +39,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp
-      - vault_login
+      - cci-common/vault_login_oidc
       - run:
           name: Run go build
           command: |
@@ -100,10 +83,10 @@ release_filter: &release_filter
       only: *tag_filter
 
 workflows:
-  version: 2
   tester:
     jobs:
       - secret-injector/dump-secrets:
+          vault-oidc: true
           <<: *dump_secrets
           context: *my_context
           <<: *test_filter
@@ -122,6 +105,7 @@ workflows:
   build-n-release:
     jobs:
       - secret-injector/dump-secrets:
+          vault-oidc: true
           <<: *dump_secrets
           context: *my_context
           <<: *release_filter
