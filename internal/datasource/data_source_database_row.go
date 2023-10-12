@@ -3,9 +3,11 @@ package datasource
 import (
 	"context"
 	"fmt"
+
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/resource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -33,7 +35,8 @@ func TableRowDatasource() *schema.Resource {
 	}
 }
 
-func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
+func tableRowRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, fmt.Sprintf("tableRowRead: data=%+v", data))
 	c := m.(*client.Client)
 	var err error
 	// Warning or errors can be collected in a slice type
@@ -59,7 +62,6 @@ func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) d
 	} else {
 		payload = map[string]interface{}{"sys_id": sysID}
 	}
-
 	rowData, err := c.GetTableRow(tableID.(string), payload)
 	if err != nil {
 		return diag.FromErr(err)
@@ -74,6 +76,5 @@ func tableRowRead(_ context.Context, data *schema.ResourceData, m interface{}) d
 	diags = append(diags, resource.ParsedResultToSchema(data, rowData)...)
 
 	data.SetId(fmt.Sprintf("%s/%s", tableID, rowData.SysData["sys_id"]))
-
 	return diags
 }
