@@ -31,6 +31,7 @@ A row in a SN table
 - `sys_created_by` (String)
 - `sys_created_on` (String)
 - `sys_domain` (String)
+- `sys_domain_path` (String)
 - `sys_mod_count` (String)
 - `sys_tags` (String)
 - `sys_updated_by` (String)

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/client"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/datasource"
 	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/resource"
@@ -79,7 +80,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diags
 	}
 
-	c := client.NewClient(*host, *username, *password)
+	c := client.NewClient(ctx, *host, *username, *password)
 
 	return c, diags
 }

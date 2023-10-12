@@ -2,18 +2,22 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/BESTSELLER/terraform-provider-servicenow-data/internal/models"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Client holds the client info for netbox
 type Client struct {
+	ctx  context.Context
 	url  string
 	user string
 	pass string
@@ -23,7 +27,7 @@ var httpClient *http.Client
 var once sync.Once
 
 // NewClient creates common settings
-func NewClient(url, user, pass string) *Client {
+func NewClient(ctx context.Context, url, user, pass string) *Client {
 	once.Do(func() {
 		httpClient = &http.Client{
 			Timeout: time.Duration(30) * time.Second,
@@ -31,6 +35,7 @@ func NewClient(url, user, pass string) *Client {
 	})
 
 	return &Client{
+		ctx:  ctx,
 		url:  url,
 		user: user,
 		pass: pass,
@@ -38,6 +43,7 @@ func NewClient(url, user, pass string) *Client {
 }
 
 func (client *Client) GetTableRow(tableID string, params map[string]interface{}) (*models.ParsedResult, error) {
+	tflog.Info(client.ctx, fmt.Sprintf("GetTableRow: tableID=%s, params=%s", tableID, params))
 	if params == nil || len(params) == 0 {
 		return nil, fmt.Errorf("sys_id and params cannot be both empty")
 	}
@@ -51,7 +57,10 @@ func (client *Client) GetTableRow(tableID string, params map[string]interface{})
 	if err != nil {
 		return nil, err
 	}
-	return parseRawListData(rawData)
+	result, err := parseRawListData(rawData)
+	tflog.Info(client.ctx, fmt.Sprintf("GetTableRow: err=%d, result=%s", err, result))
+	return result, err
+
 }
 
 func (client *Client) InsertTableRow(tableID string, tableData interface{}) (*models.ParsedResult, error) {
@@ -74,6 +83,7 @@ func (client *Client) DeleteTableRow(tableID string, sysID string) error {
 
 func (client *Client) sendRequest(method, path string, payload interface{}, expectedStatusCodes ...int) (value *[]byte, err error) {
 	url := client.url + "/api/now" + path
+	tflog.Info(client.ctx, fmt.Sprintf("sendRequest: url=%s, method=%s", url, method))
 
 	b := new(bytes.Buffer)
 	err = json.NewEncoder(b).Encode(payload)
@@ -105,11 +115,13 @@ func (client *Client) sendRequest(method, path string, payload interface{}, expe
 	if len(expectedStatusCodes) > 0 {
 		for _, code := range expectedStatusCodes {
 			if resp.StatusCode == code {
+				tflog.Info(client.ctx, fmt.Sprintf("sendRequest response: %d %s", resp.StatusCode, string(body)))
 				return &body, nil
 			}
 		}
 		return nil, fmt.Errorf("[ERROR] unexpected status code got: %v expected: %v  \n %v  \n %v", resp.StatusCode, expectedStatusCodes, string(body), url)
 	}
+	tflog.Info(client.ctx, fmt.Sprintf("sendRequest response: %d %s", resp.StatusCode, string(body)))
 	return &body, nil
 }
 
