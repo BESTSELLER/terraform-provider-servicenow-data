@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -41,6 +42,11 @@ var DefaultSystemColumns = map[string]*schema.Schema{
 		Computed: true,
 	},
 	"sys_domain": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+	},
+	"sys_domain_path": {
 		Type:     schema.TypeString,
 		Optional: true,
 		Computed: true,
