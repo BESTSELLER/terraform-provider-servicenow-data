@@ -31,7 +31,8 @@ func ServiceNowDataProvider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			resource.TableRowResourceName: resource.TableRowResource(),
+			resource.TableRowResourceName:            resource.TableRowResource(),
+			resource.ServiceCatalogOrderResourceName: resource.ServiceCatalogOrderResource(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			resource.TableRowResourceName: datasource.TableRowDatasource(),

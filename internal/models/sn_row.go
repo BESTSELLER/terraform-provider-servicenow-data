@@ -51,6 +51,26 @@ var DefaultSystemColumns = map[string]*schema.Schema{
 		Optional: true,
 		Computed: true,
 	},
+	"sys_name": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+	},
+	"sys_package": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+	},
+	"sys_policy": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+	},
+	"sys_update_name": {
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+	},
 	"sys_class_name": {
 		Type:     schema.TypeString,
 		Optional: true,
