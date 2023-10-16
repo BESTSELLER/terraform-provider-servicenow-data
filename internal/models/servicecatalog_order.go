@@ -74,13 +74,6 @@ var ServiceCatalogOrderResponseColumns = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Computed:    true,
 	},
-	// this field is not documented, causes errors and is not needed
-	// "$$uiNotification": {
-	// 	Type:     schema.TypeSet,
-	// 	Computed: true,
-	// 	Elem:     &schema.Schema{Type: schema.TypeString},
-	// 	Optional: true,
-	// },
 	"request_number": {
 		Description: "Request number.",
 		Type:        schema.TypeString,
