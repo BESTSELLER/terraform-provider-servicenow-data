@@ -51,9 +51,9 @@ func (client *Client) GetTableRow(tableID string, params map[string]interface{})
 	for k, v := range params {
 		query = fmt.Sprintf("%s&%s=%s", query, k, v)
 	}
-	rowPath := fmt.Sprintf("/table/%s%s", tableID, query)
+	rowPath := fmt.Sprintf("/api/now/table/%s%s", tableID, query)
 
-	rawData, err := client.sendRequest(http.MethodGet, rowPath, nil, 200)
+	rawData, err := client.SendRequest(http.MethodGet, rowPath, nil, 200)
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +64,8 @@ func (client *Client) GetTableRow(tableID string, params map[string]interface{})
 }
 
 func (client *Client) InsertTableRow(tableID string, tableData interface{}) (*models.ParsedResult, error) {
-	rowPath := fmt.Sprintf("/table/%s", tableID)
-	rawData, err := client.sendRequest(http.MethodPost, rowPath, tableData, 201)
+	rowPath := fmt.Sprintf("/api/now/table/%s", tableID)
+	rawData, err := client.SendRequest(http.MethodPost, rowPath, tableData, 201)
 	if err != nil {
 		return nil, err
 	}
@@ -73,17 +73,17 @@ func (client *Client) InsertTableRow(tableID string, tableData interface{}) (*mo
 }
 
 func (client *Client) DeleteTableRow(tableID string, sysID string) error {
-	rowPath := fmt.Sprintf("/table/%s/%s", tableID, sysID)
-	_, err := client.sendRequest(http.MethodDelete, rowPath, nil, 204, 404)
+	rowPath := fmt.Sprintf("/api/now/table/%s/%s", tableID, sysID)
+	_, err := client.SendRequest(http.MethodDelete, rowPath, nil, 204, 404)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (client *Client) sendRequest(method, path string, payload interface{}, expectedStatusCodes ...int) (value *[]byte, err error) {
-	url := client.url + "/api/now" + path
-	tflog.Info(client.ctx, fmt.Sprintf("sendRequest: url=%s, method=%s", url, method))
+func (client *Client) SendRequest(method, path string, payload interface{}, expectedStatusCodes ...int) (value *[]byte, err error) {
+	url := client.url + path
+	tflog.Info(client.ctx, fmt.Sprintf("SendRequest: url=%s, method=%s", url, method))
 
 	b := new(bytes.Buffer)
 	err = json.NewEncoder(b).Encode(payload)
@@ -115,19 +115,19 @@ func (client *Client) sendRequest(method, path string, payload interface{}, expe
 	if len(expectedStatusCodes) > 0 {
 		for _, code := range expectedStatusCodes {
 			if resp.StatusCode == code {
-				tflog.Info(client.ctx, fmt.Sprintf("sendRequest response: %d %s", resp.StatusCode, string(body)))
+				tflog.Info(client.ctx, fmt.Sprintf("SendRequest response: %d %s", resp.StatusCode, string(body)))
 				return &body, nil
 			}
 		}
 		return nil, fmt.Errorf("[ERROR] unexpected status code got: %v expected: %v  \n %v  \n %v", resp.StatusCode, expectedStatusCodes, string(body), url)
 	}
-	tflog.Info(client.ctx, fmt.Sprintf("sendRequest response: %d %s", resp.StatusCode, string(body)))
+	tflog.Info(client.ctx, fmt.Sprintf("SendRequest response: %d %s", resp.StatusCode, string(body)))
 	return &body, nil
 }
 
 func (client *Client) UpdateTableRow(tableID, sysID string, payload interface{}) (*models.ParsedResult, error) {
-	rowPath := fmt.Sprintf("/table/%s/%s", tableID, sysID)
-	rawData, err := client.sendRequest(http.MethodPut, rowPath, payload, 200)
+	rowPath := fmt.Sprintf("/api/now/table/%s/%s", tableID, sysID)
+	rawData, err := client.SendRequest(http.MethodPut, rowPath, payload, 200)
 	if err != nil {
 		return nil, err
 	}
