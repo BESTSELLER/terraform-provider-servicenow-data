@@ -55,7 +55,7 @@ jobs:
         enum: ["test", "release"]
         default: "test"
     docker:
-      - image: cimg/go:1.21.4
+      - image: cimg/go:1.21.5
     steps:
       - checkout
       - attach_workspace:
