@@ -1,6 +1,6 @@
 module github.com/BESTSELLER/terraform-provider-servicenow-data
 
-go 1.19
+go 1.22
 
 require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0

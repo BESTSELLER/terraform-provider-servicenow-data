@@ -55,7 +55,7 @@ jobs:
         enum: ["test", "release"]
         default: "test"
     docker:
-      - image: cimg/go:1.22.0
+      - image: cimg/go:1.22.1
     steps:
       - checkout
       - attach_workspace:
@@ -66,7 +66,9 @@ jobs:
 
 
 tag_filter: &tag_filter /v[0-9]+.[0-9]+.[0-9]+/
-my_context: &my_context es02-prod
+
+prod_context: &prod_context
+  context: es02-prod
 
 dump_secrets: &dump_secrets
   vault-path: ES/data/terraform-provider/prod
@@ -87,37 +89,29 @@ workflows:
     jobs:
       - secret-injector/dump-secrets:
           vault-oidc: true
-          <<: *dump_secrets
-          context: *my_context
-          <<: *test_filter
+          <<: [*dump_secrets, *prod_context, *test_filter]
       - test:
           requires:
             - secret-injector/dump-secrets
-          context: *my_context
-          <<: *test_filter
+          <<: [*test_filter, *prod_context]
       - build:
-          context: *my_context
           release-type: test
           name: test-publish
           requires:
             - test
-          <<: *test_filter
+          <<: [*test_filter, *prod_context]
   build-n-release:
     jobs:
       - secret-injector/dump-secrets:
           vault-oidc: true
-          <<: *dump_secrets
-          context: *my_context
-          <<: *release_filter
+          <<: [*dump_secrets, *prod_context, *release_filter]
       - test:
           requires:
             - secret-injector/dump-secrets
-          context: *my_context
-          <<: *release_filter
+          <<: [*release_filter, *prod_context]
       - build:
-          context: *my_context
           name: build
           release-type: release
           requires:
             - test
-          <<: *release_filter
+          <<: [*release_filter, *prod_context]
