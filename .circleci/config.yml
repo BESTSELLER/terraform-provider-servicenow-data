@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   secret-injector: bestsellerit/secret-injector@2.8.0
-  cci-common: bestsellerit/cci-common@3.3.2
+  cci-common: bestsellerit/cci-common@3.3.4
 
 commands:
   goreleaser:
@@ -27,9 +27,9 @@ commands:
           command: |
             source /tmp/secrets
             if [ "<< parameters.release-type >>" = "test" ] ; then
-              goreleaser release --snapshot --rm-dist
+              goreleaser release --snapshot --clean
             else
-              goreleaser release --rm-dist
+              goreleaser release --clean
             fi
 
 jobs:
