@@ -1,8 +1,8 @@
 version: 2.1
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@2.8.0
-  cci-common: bestsellerit/cci-common@3.4.0
+  secret-injector: bestsellerit/secret-injector@2.8.3
+  cci-common: bestsellerit/cci-common@4.0.0
 
 commands:
   goreleaser:
@@ -55,7 +55,7 @@ jobs:
         enum: ["test", "release"]
         default: "test"
     docker:
-      - image: cimg/go:1.22.4
+      - image: cimg/go:1.24.0
     steps:
       - checkout
       - attach_workspace:
