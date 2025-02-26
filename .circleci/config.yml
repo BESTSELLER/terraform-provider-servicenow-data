@@ -34,7 +34,9 @@ commands:
 
 jobs:
   test:
-    executor: cci-common/ci_image
+    executor:
+      name: cci-common/ci_image
+      tag: "0.6.17"
     steps:
       - checkout
       - attach_workspace:
