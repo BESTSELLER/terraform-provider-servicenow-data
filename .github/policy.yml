@@ -16,7 +16,6 @@ approval_rules:
     if:
       has_successful_status:
         - "tester"
-        - "GitGuardian Security Checks"
     requires:
       count: 0
   - name: engineering services has approved
