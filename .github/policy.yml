@@ -28,6 +28,5 @@ approval_rules:
       has_author_in:
         users:
           - "dependabot[bot]"
-          - "dependabot-circleci[bot]"
     requires:
       count: 0
