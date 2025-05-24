@@ -1,0 +1,59 @@
+name: goreleaser
+
+on:
+  release:
+    types: [published]
+  pull_request:
+    branches:
+      - "master"
+
+permissions:
+  contents: write
+
+jobs:
+  go_test:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    name: Go lint and test
+    uses: BESTSELLER/actions/.github/workflows/go_test.yaml@2240df6fe211582d390fdff68c66c1003a20351a # v1.17.0
+    secrets: inherit
+    with:
+      environment: prod
+  goreleaser:
+    name: "goreleaser${{ startsWith(github.event_name, 'pull_request') && ' snapshot mode' || '' }}"
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5.5.0
+        with:
+          go-version-file: "go.mod"
+
+      - name: Get cluster credentials
+        id: secrets
+        uses: hashicorp/vault-action@7709c609789c5e27b757a85817483caadbb5939a # v3.3.0
+        with:
+          method: jwt
+          url: ${{ vars.VAULT_ADDR }}
+          path: ${{ vars.VAULT_AUTH_PATH }}
+          role: ${{ vars.VAULT_ROLE }}
+          secrets: |
+            ES/data/terraform-provider/prod * ;
+
+      - name: Import GPG key
+        uses: step-security/ghaction-import-gpg@v6
+        if: ${{ !startsWith(github.event_name, 'pull_request') }}
+        with:
+          gpg_private_key: ${{ steps.secrets.outputs.GPG_PRIVATE_KEY }}
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6.3.0
+        with:
+          distribution: goreleaser
+          args: release --clean ${{ startsWith(github.event_name, 'pull_request') && '--snapshot' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
