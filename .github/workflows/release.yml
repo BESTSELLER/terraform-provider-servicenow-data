@@ -7,6 +7,10 @@ on:
     branches:
       - "master"
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   goreleaser:
     name: "goreleaser${{ startsWith(github.event_name, 'pull_request') && ' snapshot mode' || '' }}"
