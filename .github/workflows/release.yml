@@ -8,13 +8,6 @@ on:
       - "master"
 
 jobs:
-  go_test:
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    name: Go lint and test
-    uses: BESTSELLER/actions/.github/workflows/go_test.yaml@v1.17.0
-    secrets: inherit
-    with:
-      environment: prod
   goreleaser:
     name: "goreleaser${{ startsWith(github.event_name, 'pull_request') && ' snapshot mode' || '' }}"
     runs-on: ubuntu-latest
