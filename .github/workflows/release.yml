@@ -40,7 +40,6 @@ jobs:
 
       - name: Import GPG key
         uses: step-security/ghaction-import-gpg@v6
-        if: ${{ !startsWith(github.event_name, 'pull_request') }}
         with:
           gpg_private_key: ${{ steps.secrets.outputs.GPG_PRIVATE_KEY }}
 
