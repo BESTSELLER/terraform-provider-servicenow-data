@@ -14,7 +14,7 @@ jobs:
   go_test:
     if: github.event.pull_request.head.repo.full_name == github.repository
     name: Go lint and test
-    uses: BESTSELLER/actions/.github/workflows/go_test.yaml@2240df6fe211582d390fdff68c66c1003a20351a # v1.17.0
+    uses: BESTSELLER/actions/.github/workflows/go_test.yaml@v1.17.0
     secrets: inherit
     with:
       environment: prod
