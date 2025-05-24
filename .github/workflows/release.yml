@@ -39,7 +39,7 @@ jobs:
             ES/data/terraform-provider/prod * ;
 
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@v6.3.0
         with:
           gpg_private_key: ${{ steps.secrets.outputs.GPG_PRIVATE_KEY }}
 
