@@ -13,20 +13,21 @@ policy:
         - "bestseller"
 approval_rules:
   - name: tests passed
-    if:
-      has_successful_status:
-        - "tester"
     requires:
+      conditions:
+        has_successful_status:
+        - "tester"
       count: 0
+
   - name: engineering services has approved
     requires:
       count: 1
       teams:
         - "BESTSELLER/engineering-services"
   - name: dependabot is making the PR
-    if:
-      has_author_in:
-        users:
-          - "dependabot[bot]"
     requires:
+      conditions:
+        has_author_in:
+          users:
+            - "dependabot[bot]"
       count: 0
