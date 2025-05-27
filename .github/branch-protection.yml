@@ -1,4 +1,0 @@
-branch: master
-required_status_check:
-  contexts:
-    - "policy-bot: master"
