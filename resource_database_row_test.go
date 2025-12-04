@@ -12,7 +12,7 @@ import (
 
 func TestAccRowBasic(t *testing.T) {
 	tableId := "x_beas_team_engi_0_lasse"
-	team := "engineering-services"
+	team := "developer-platform"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
