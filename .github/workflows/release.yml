@@ -39,7 +39,7 @@ jobs:
 
       - name: Test
         if: always()
-        uses: robherley/go-test-action@ded24db7182143ded3264c543f5dc3dd1e5bb5fe # v1.0.1
+        uses: robherley/go-test-action@2f859e0c8769d755d3174eecb9af8f64660827f3 # v1.1.0
   goreleaser:
     name: "goreleaser${{ startsWith(github.event_name, 'pull_request') && ' snapshot mode' || '' }}"
     if: ${{ (github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'release') }}
