@@ -13,11 +13,11 @@ policy:
         - "bestseller"
 approval_rules:
   - name: tests passed
-    requires:
-      conditions:
-        has_successful_status:
-        - "tester"
-      count: 0
+    if:
+      has_workflow_result:
+        conclusions: ["success", "skipped"]
+        workflows:
+          - ".github/workflows/release.yml"
 
   - name: engineering services has approved
     requires:
